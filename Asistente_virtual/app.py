@@ -1,8 +1,6 @@
 from streamlit_mic_recorder import speech_to_text
 from config import llm
 import streamlit as st
-import pyttsx3 
-import threading
 import time
 
 # Configuración de página
@@ -50,13 +48,11 @@ st.markdown("""
 
 # Título principal
 st.markdown('<h1 class="main-header">🗣️ Tu Asistente de Voz Inteligente</h1>', unsafe_allow_html=True)
-st.markdown("*Aplicación de chat avanzada con reconocimiento de voz y síntesis de habla*")
+st.markdown("*Aplicación de chat avanzada con reconocimiento de voz*")
 
 # Inicializar estado de la sesión
 if 'conversation_history' not in st.session_state:
     st.session_state.conversation_history = []
-if 'voice_enabled' not in st.session_state:
-    st.session_state.voice_enabled = False
 
 # Configuraciones en la barra lateral
 st.sidebar.header("⚙️ Configuraciones")
@@ -85,49 +81,6 @@ tone = st.sidebar.selectbox(
     }[x]
 )
 
-# Configuración de voz (Text-to-Speech)
-st.sidebar.subheader("🔊 Configuración de Voz")
-voice_enabled = st.sidebar.checkbox("Activar respuesta por voz", value=st.session_state.voice_enabled)
-st.session_state.voice_enabled = voice_enabled
-
-if voice_enabled:
-    # Configuraciones de voz
-    voice_rate = st.sidebar.slider("Velocidad de habla", 100, 300, 200)
-    voice_volume = st.sidebar.slider("Volumen", 0.0, 1.0, 0.9)
-    
-    # Selección de voz (esto dependerá del sistema)
-    voice_gender = st.sidebar.selectbox(
-        "Tipo de voz:",
-        ["femenina", "masculina"],
-        format_func=lambda x: f"👩 Voz {x}" if x == "femenina" else f"👨 Voz {x}"
-    )
-
-# Función para configurar el motor de voz
-def setup_tts_engine():
-    """Configura el motor de text-to-speech"""
-    try:
-        engine = pyttsx3.init()
-        voices = engine.getProperty('voices')
-        
-        # Configurar propiedades básicas
-        engine.setProperty('rate', voice_rate if voice_enabled else 200)
-        engine.setProperty('volume', voice_volume if voice_enabled else 0.9)
-        
-        # Intentar seleccionar voz por género (funcionalidad limitada según el sistema)
-        if voices and voice_enabled:
-            # Buscar voz femenina o masculina (esto es aproximado)
-            for voice in voices:
-                if voice_gender == "femenina" and ("female" in voice.name.lower() or "zira" in voice.name.lower()):
-                    engine.setProperty('voice', voice.id)
-                    break
-                elif voice_gender == "masculina" and ("male" in voice.name.lower() or "david" in voice.name.lower()):
-                    engine.setProperty('voice', voice.id)
-                    break
-        
-        return engine
-    except:
-        return None
-
 # Función para generar prompt según el tono
 def get_tone_prompt(tone, user_input):
     """Genera un prompt específico según el tono seleccionado"""
@@ -137,16 +90,6 @@ def get_tone_prompt(tone, user_input):
         "divertido": f"Responde de manera creativa, divertida y con humor (pero manteniendo la información útil) a: {user_input}"
     }
     return tone_prompts.get(tone, user_input)
-
-# Función para reproducir texto como voz
-def speak_text(text, engine):
-    """Reproduce el texto usando el motor TTS"""
-    try:
-        if engine:
-            engine.say(text)
-            engine.runAndWait()
-    except Exception as e:
-        st.error(f"Error en la síntesis de voz: {e}")
 
 # Sección principal - Captura de voz
 st.subheader("🎤 Habla con tu asistente")
@@ -193,16 +136,6 @@ if text:
             "timestamp": time.strftime("%H:%M:%S")
         })
         
-        # Reproducir respuesta por voz si está habilitado
-        if voice_enabled:
-            with st.spinner("🔊 Reproduciendo respuesta..."):
-                tts_engine = setup_tts_engine()
-                if tts_engine:
-                    # Ejecutar TTS en un hilo separado para no bloquear la UI
-                    thread = threading.Thread(target=speak_text, args=(response.content, tts_engine))
-                    thread.daemon = True
-                    thread.start()
-        
         st.rerun()
         
     except Exception as e:
@@ -238,7 +171,6 @@ st.sidebar.subheader("ℹ️ Información")
 st.sidebar.info(
     "**Características:**\n"
     "• 🎤 Reconocimiento de voz multiidioma\n"
-    "• 🗣️ Síntesis de voz configurable\n"
     "• 🎭 Múltiples tonos de respuesta\n"
     "• 💾 Historial de conversación\n"
     "• ⚙️ Configuraciones personalizables"
@@ -251,7 +183,6 @@ with st.sidebar.expander("💡 Tips de Uso"):
     - Habla claramente y a velocidad normal
     - Usa el micrófono en un ambiente silencioso
     - Experimenta con diferentes tonos según el contexto
-    - Ajusta la velocidad de voz según tu preferencia
     """)
 
 # Footer
