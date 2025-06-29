@@ -2,3 +2,4 @@ streamlit
 streamlit-mic-recorder
 langchain
 langchain_openai
+pyttsx3
