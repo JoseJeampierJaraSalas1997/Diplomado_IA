@@ -1,10 +1,17 @@
-import streamlit as st
+impor1 streamlit as st
 import joblib
 import re
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 
+
+# Descargar recursos necesarios si no existen
+try:
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    nltk.download('stopwords')
+# **********************
 
 # Function for text preprocessing
 def preprocess_text(text):
