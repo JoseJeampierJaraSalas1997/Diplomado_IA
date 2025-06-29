@@ -19,30 +19,100 @@ st.markdown("""
         margin-bottom: 30px;
     }
     .chat-message {
-        padding: 10px;
-        border-radius: 10px;
-        margin: 10px 0;
+        padding: 16px 20px;
+        border-radius: 18px;
+        margin: 16px 0;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .chat-message:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.12);
     }
     .user-message {
-        background-color: #E8F6F3;
-        border-left: 4px solid #58D68D;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        margin-left: 20px;
+        border-top-right-radius: 4px;
+    }
+    .user-message::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255,255,255,0.1);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .user-message:hover::before {
+        opacity: 1;
     }
     .assistant-message {
-        background-color: #EBF5FB;
-        border-left: 4px solid #3498DB;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        margin-right: 20px;
+        border-top-left-radius: 4px;
+    }
+    .assistant-message::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255,255,255,0.1);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .assistant-message:hover::before {
+        opacity: 1;
     }
     .tone-badge {
         display: inline-block;
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: bold;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
         color: white;
-        margin-left: 10px;
+        margin-left: 12px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.2);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
-    .formal { background-color: #5D6D7E; }
-    .casual { background-color: #F39C12; }
-    .divertido { background-color: #E74C3C; }
+    .formal { 
+        background: rgba(93, 109, 126, 0.9);
+        box-shadow: 0 2px 8px rgba(93, 109, 126, 0.3);
+    }
+    .casual { 
+        background: rgba(243, 156, 18, 0.9);
+        box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+    }
+    .divertido { 
+        background: rgba(231, 76, 60, 0.9);
+        box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+    }
+    .message-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+    .message-content {
+        font-size: 15px;
+        line-height: 1.5;
+        position: relative;
+        z-index: 1;
+    }
+    .timestamp {
+        font-size: 12px;
+        opacity: 0.8;
+        margin-left: 8px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -152,16 +222,23 @@ if st.session_state.conversation_history:
             
             st.markdown(f"""
             <div class="chat-message user-message">
-                <strong>🧑 Tú</strong> <small>({message.get("timestamp", "")})</small>{tone_badge}
-                <br>{message["content"]}
+                <div class="message-header">
+                    <strong>🧑 Tú</strong>
+                    <span class="timestamp">({message.get("timestamp", "")})</span>
+                    {tone_badge}
+                </div>
+                <div class="message-content">{message["content"]}</div>
             </div>
             """, unsafe_allow_html=True)
             
         else:
             st.markdown(f"""
             <div class="chat-message assistant-message">
-                <strong>🤖 Asistente</strong> <small>({message.get("timestamp", "")})</small>
-                <br>{message["content"]}
+                <div class="message-header">
+                    <strong>🤖 Asistente</strong>
+                    <span class="timestamp">({message.get("timestamp", "")})</span>
+                </div>
+                <div class="message-content">{message["content"]}</div>
             </div>
             """, unsafe_allow_html=True)
 
